@@ -2,13 +2,11 @@
     import Login from './Login.svelte';
     import Message from './Message.svelte';
     import { onMount } from 'svelte';
-    import { username, user } from '/user';
+    import { username, user } from './user.js';
+    import GUN from 'gun'
     import debounce from 'lodash.debounce';
-    import GUN from 'gun';
-    import * as sodium from 'libsodium-wrappers';
 
     const db = GUN();
-
     let newMessage;
     let messages =[];
     
@@ -29,37 +27,6 @@
         canAutoScroll = (e.target.scroolTop || Infinity) > lastScrollTop;
         lastScrollTop = e.target.scroolTop;
     }
-
-    const generateRandomKey = async () => {
-        await sodium.ready;
-        return sodium.crypto_secretbox_keygen();
-        };
-
-        // Function to encrypt a message with a symmetric key
-    const encryptMessage = async (message, key) => {
-        await sodium.ready;
-
-        // Generate a random nonce
-        const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
-
-        // Encrypt the message
-        const ciphertext = sodium.crypto_secretbox_easy(message, nonce, key);
-
-        return { ciphertext, nonce };
-        };
-
-        // Function to decrypt an encrypted message with a symmetric key
-    const decryptMessage = async (ciphertext, nonce, key) => {
-        await sodium.ready;
-
-        // Decrypt the message
-        try {
-            const decryptedMessage = sodium.crypto_secretbox_open_easy(ciphertext, nonce, key);
-            return decryptedMessage;
-        } catch (error) {
-            throw new Error('Decryption failed: Invalid key or ciphertext');
-        }
-    };
 
     $: debouncedWatchScroll = debounce(watchScroll, 1000)
 
@@ -108,7 +75,7 @@
 
 <div class="container">
   {#if $username}
-    <main on:scroll={debouncedWatchScroll}>
+    <main>
       {#each messages as message (message.when)}
         <Message {message} sender={$username} />
       {/each}
