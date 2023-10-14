@@ -6,6 +6,91 @@ var db = Gun();
 var userList = db.get("users");
 var chatList = db.get("chats");
 
+const addUser = (username, passwd) => {
+  userList.get(username).set({ pass: passwd, chatCnt: 0 });
+};
+
+const createChat = (userMaster, chatName, chatPasswd) => {
+  chatList
+    .get(userMaster + chatName)
+    .set({ name: chatName, passwd: chatPasswd });
+  chatList
+    .get(userMaster + chatName)
+    .get("members")
+    .set({ userId: userMaster });
+};
+
+const joinChat = (userName, chatId) => {
+  chatList.get(chatId).get("members").set({ userId: userName });
+};
+
+const sendMessage = (userName, chatId, msg) => {
+  chatList.get(chatId).get("Msg").set({
+    sender: userName,
+    content: msg,
+    // time: new Date().toLocaleTimeString(),
+  });
+};
+
+const readMessage = (chatId, userId) => {
+  if (
+    userId in
+    chatList
+      .get(chatId)
+      .get("members")
+      .once((v) => {
+        v.userId;
+      })
+  ) {
+    return chatList
+      .get(chatId)
+      .get("Msg")
+      .once((v) => {
+        v;
+      });
+  }
+  return null;
+};
+
+// addUser("yash", "pass");
+// addUser("ryah", "pass2");
+//
+// createChat("yash", "meowland", "aloo");
+
+// sendMessage("yash", "yashmeowland", "cat");
+
+// userList
+//   .get("yash")
+//   .map()
+//   .once((v) => {
+//     console.log(v);
+//   });
+//
+// userList
+//   .get("ryah")
+//   .map()
+//   .once((v) => {
+//     console.log(v);
+//   });
+
+joinChat("ryah", "yashmeowland");
+
+chatList
+  .get("yashmeowland")
+  .get("members")
+  .map()
+  .once((v) => {
+    console.log(v);
+  });
+
+chatList
+  .get("yashmeowland")
+  .get("Msg")
+  .map()
+  .once((v) => {
+    console.log(v.content);
+  });
+
 // chatList.get("chat2").put(null);
 // chatList.get("chat3").set({
 //   sender: "a",
@@ -28,12 +113,12 @@ var chatList = db.get("chats");
 
 // console.log(userList.get("user1").once((v) => console.log(v)));
 // console.log(chatList.get("chat1").once((v) => console.log(v)));
-chatList
-  .get("chat3")
-  .map()
-  .once((data) => {
-    console.log(data);
-  });
+// chatList
+//   .get("chat3")
+//   .map()
+//   .once((data) => {
+//     console.log(data);
+//   });
 
 // node1.get('user1').put({age: 'meow'});
 // console.log(node1.get('user1').once(v => console.log(v)))
